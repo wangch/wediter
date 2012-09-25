@@ -24,7 +24,7 @@ namespace wediter {
 
 	/// class EditerView
 	EditerView::EditerView(EditerDoc* doc, int id) 
-		: doc_(doc), id_(id), scroll_v_(0), 
+		: doc_(doc), id_(id), scroll_v_(0), caret_bmp_(NULL),
 		scroll_h_(0), max_line_w_(0), moving_(false), fb_show_(false), rb_show_(false),
 		finding_(false), replacing_(false), match_case_(false), match_whole_word_(false), show_ln_(true) {
 	}
@@ -313,21 +313,21 @@ namespace wediter {
 	}
 
 	void EditerView::setSize() {
-		static bool once = false;
-		if (!once) {
+		//static bool once = false;
+		//if (!once) {
 			tstring chars(T("abcdefghijklmnopqrstuvwxyz") \
 							T("ABCDEFGHIJKLMNOPQRSTUVWXYZ") \
 							T("0123456789!@#$%^&*()_+/?<>,.:;\'[]{}|\\\"~"));
 			Gdiplus::Size sz = getTxtSize(chars);
 			this->line_height_ = sz.Height + 1;
 			this->char_width_ = sz.Width / chars.length() + 1;
-			once = true;
-		}
+			//once = true;
+		//}
 	}
 
 	int EditerView::createCaret() {
-		static bool once = false;
-		if (!once) {
+		//static bool once = false;
+		//if (!once) {
 			int cw = 1;
 			int size = (((cw + 15) & ~15) >> 3) * this->line_height_;
 			char* bits = new char[size];
@@ -337,10 +337,13 @@ namespace wediter {
 			delete [] bits;
 
 			::CreateCaret(this->hw_, hbp, cw, this->line_height_);
+			if (this->caret_bmp_) {
+				::DeleteObject(this->caret_bmp_);
+			}
 			this->caret_bmp_ = hbp;
 			::ShowCaret(this->hw_);
-			once = true;
-		}
+			//once = true;
+		//}
 
 		return 0;
 	}
@@ -928,6 +931,11 @@ namespace wediter {
 				this->paste();
 			}
 			break;
+		case VK_ADD:
+			{
+				int n = 0;
+			}
+			break;
 		default:
 			break;
 		}
@@ -953,9 +961,9 @@ namespace wediter {
 		}
 		
 
-		if (::GetKeyState(VK_CONTROL) < 0) { // process ctrl + key
+		if (::GetKeyState(VK_CONTROL) < 0 && k != VK_CONTROL) { // process ctrl + key
 			this->ctrlKey(k);
-		}
+		} 
 
 		this->updatePos(w, h);			
 		this->reDraw();
@@ -1188,9 +1196,34 @@ namespace wediter {
 		case T('L') : // show line number
 			this->show_ln_ = !this->show_ln_;
 			break;
-		case T('+') : // ++font size
+		case VK_OEM_PLUS : // ++font size
+			{
+				Gdiplus::FontFamily ff;
+				this->cfg_.font->GetFamily(&ff);
+				auto size = this->cfg_.font->GetSize();
+				++size;
+				delete this->cfg_.font;
+				this->cfg_.font = new Gdiplus::Font(&ff, size, 
+					Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
+				this->setSize();
+				this->createCaret();
+			}
 			break;
-		case T('-') : // --font size
+		case VK_OEM_MINUS : // --font size
+			{
+				Gdiplus::FontFamily ff;
+				this->cfg_.font->GetFamily(&ff);
+				auto size = this->cfg_.font->GetSize();
+				--size;
+				if (size < 5) {
+					return;
+				}
+				delete this->cfg_.font;
+				this->cfg_.font = new Gdiplus::Font(&ff, size, 
+					Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
+				this->setSize();
+				this->createCaret();
+			}
 			break;
 		default:
 			break;
