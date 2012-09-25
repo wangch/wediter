@@ -411,12 +411,11 @@ namespace wediter {
 
 		rc.X = get_bytes(l->txt.substr(0, p1), this->cfg_.tabstop) * this->char_width_ + this->lnu_width_;
 		rc.Width = get_bytes(l->txt.substr(p1, p2 - p1), this->cfg_.tabstop) * this->char_width_;
-		if (psp.sel_1.id != psp.sel_2.id && p2 - p1  == l->txt.length()) {
+		if (psp.sel_1.id != psp.sel_2.id && l->index != psp.sel_2.id && p2 - p1  == l->txt.length()) {
 			rc.Width += this->char_width_;
 		}
 
 		rc.X += (int)this->cfg_.font->GetSize() / 6;
-		rc.Width += (int)this->cfg_.font->GetSize() / 6;
 
 		Gdiplus::SolidBrush bkbr(this->cfg_.select_color);
 		g->FillRectangle(&bkbr, rc);	
@@ -1633,4 +1632,4 @@ namespace wediter {
 		return 0;
 	}
 
-}
+} // namespace wediter
