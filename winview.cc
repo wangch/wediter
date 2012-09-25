@@ -931,11 +931,6 @@ namespace wediter {
 				this->paste();
 			}
 			break;
-		case VK_ADD:
-			{
-				int n = 0;
-			}
-			break;
 		default:
 			break;
 		}
