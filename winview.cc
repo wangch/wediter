@@ -26,7 +26,7 @@ namespace wediter {
 	EditerView::EditerView(EditerDoc* doc, int id) 
 		: doc_(doc), id_(id), scroll_v_(0), 
 		scroll_h_(0), max_line_w_(0), moving_(false), fb_show_(false), rb_show_(false),
-		finding_(false), replacing_(false), match_case_(false), match_whole_word_(false) {
+		finding_(false), replacing_(false), match_case_(false), match_whole_word_(false), show_ln_(true) {
 	}
 
 	EditerView::~EditerView() {
@@ -276,9 +276,6 @@ namespace wediter {
 		tstring& txt(l->txt);
 		int len =txt.length();
 		int w = (this->scroll_h_ + pt.x - this->lnu_width_) / this->char_width_;
-		if (w < 0) {
-			w = 0;
-		}
 		for (int i = 0; i < len && i < w; ++i) {
 			if (txt[i] > 0x80) {
 				--w;
@@ -288,6 +285,9 @@ namespace wediter {
 			}
 		}
 
+		if (w < 0) {
+			w = 0;
+		}
 		pos.pos = w < len ? w : len;
 		return pos;	
 	}
@@ -442,11 +442,12 @@ namespace wediter {
 	}
 
 	void EditerView::drawLnu(Gdiplus::Graphics* g, Line* l, Gdiplus::PointF& pt) {
-		int nl = this->doc_->GetLineList()->size();
-		int id = l->index;
-		if (id == 0) {
-			id = 1;
+		if (!show_ln_) {
+			this->lnu_width_ = 0;
+			return;
 		}
+		int nl = this->doc_->GetLineList()->size();
+		int id = l->index + 1;
 
 		int lg = (int)log10((double)nl) + 1;
 		int lg2 = (int)log10((double)id);
@@ -458,7 +459,7 @@ namespace wediter {
 		for (int i = lg2; i < lg; ++i) {
 			sps += sp;
 		}
-		::_stprintf_s(num, T("%s%d"), sps.c_str(), l->index);
+		::_stprintf_s(num, T("%s%d"), sps.c_str(), id);
 
 		Gdiplus::SolidBrush nbr(Gdiplus::Color(192, 192, 192));
 		g->DrawString(num, -1, this->cfg_.font, pt, &nbr);
@@ -1185,6 +1186,9 @@ namespace wediter {
 			break;
 		case T('S') : // save
 			break;
+		case T('L') : // show line number
+			this->show_ln_ = !this->show_ln_;
+			break;
 		case T('+') : // ++font size
 			break;
 		case T('-') : // --font size
@@ -1248,7 +1252,7 @@ namespace wediter {
 			}
 			POINT ptt;
 			ptt.x = pt.x;
-			ptt.y = pt.y;
+			ptt.y = pt.y + this->scroll_v_;
 
 			RECT rc;
 			rc.top = l->index * this->line_height_;

@@ -234,6 +234,7 @@ namespace wediter {
 		tstring rep_txt_;
 		bool match_case_;
 		bool match_whole_word_;
+		bool show_ln_;
 	};
 }
 
