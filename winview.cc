@@ -1113,7 +1113,7 @@ namespace wediter {
 
 
 		int fw = w;
-		int fh = this->line_height_ * 2 - 5;
+		int fh = 20 * 2 - 5;
 		int fx = rc.left;
 		int fy = rc.top + h - fh;
 
@@ -1139,7 +1139,7 @@ namespace wediter {
 
 
 		int rw = w;
-		int rh = this->line_height_ * 4 - 20;
+		int rh = 20 * 4 - 20;
 		int rx = rc.left;
 		int ry = rc.top + h - rh;
 
