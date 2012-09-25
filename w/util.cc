@@ -45,6 +45,9 @@ namespace w {
 		while (std::getline(is, line_txt)) {
 			Line* l = new Line;
 			l->txt = line_txt;
+			while (!l->txt.empty() && l->txt.back() == T('\r')) {
+				l->txt.pop_back();
+			}
 			ll.push_back(l);
 		}
 		if (line_txt.empty()) {
